@@ -1,6 +1,7 @@
 # imports
 import time
 import random
+import keyboard
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -38,6 +39,9 @@ class WordlePlayer:
         except Exception as e:
             print(e)
         time.sleep(2)
+
+        # wordle inspect: there's three states - absent, present and correct so modify list on that basis
+
 
 if __name__ == "__main__":
     WordlePlayer().play()
