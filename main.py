@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 class WordlePlayer:
+
     def __init__(self):
         self.options = webdriver.ChromeOptions()
         self.options.add_argument("--disable-notifications")
@@ -21,18 +22,21 @@ class WordlePlayer:
             line.strip()
             word_list.append(line)
         return word_list
-    
+
     def play(self):
         self.driver.get("https://www.nytimes.com/games/wordle/index.html")
         time.sleep(1)
+
         self.driver.maximize_window()
         time.sleep(1)
+
         try:
             button = self.driver.find_element(by = "class name", value = "Welcome-module_button__ZG0Zh")
             button.click()
         except Exception as e:
             print(e)
         time.sleep(1)
+
         try:
             button = self.driver.find_element(by = "class name", value = "Modal-module_closeIcon__TcEKb")
             button.click()
@@ -51,19 +55,61 @@ class WordlePlayer:
 
         self.load() # loading the list
 
-        word = random.choice(self.word_list) # random word from the list
-        print(word) # check
+        word = random.choice(self.word_list) # random word from the list)
 
         attempts = 0 # setting attempts to 0
         guess = False # variable for future check
 
-        for attempts in range (0, 6):
+        for attempts in range(6):
             attempts = attempts + 1
+            if len(self.word_list) == 0:
+                self.fail("Word wasn't in the 'answers.txt' file")
+
             word = random.choice(self.word_list)
-            letters = []
+
             for letter in word:
-                letters.append(letter)
-                button = self.driver.find_element(by = "class name", value = "")
+                keyboard.write(letter)
+                time.sleep(0.2)
+
+            time.sleep(0.2)
+
+            keyboard.press_and_release("enter")
+
+            time.sleep(2)
+
+            row = (
+                'div[class*="Board"] div[class*="Row-module"]:nth-of-type(%s) '
+                % attempts
+            )
+            tile = row + 'div:nth-child(%s) div[class*="module_tile__"]'
+            try:
+                element_present = EC.presence_of_element_located((By.CSS_SELECTOR, tile % "5" + '[data-state$="t"]'))
+                WebDriverWait(self.driver, 10).until(element_present)
+            except TimeoutError:
+                print(f"Timed out waiting for element with locator: {tile % '5'} [data-state$='t']")
+
+            letter_status = []
+
+            for i in range(1, 6):
+                letter_eval = self.driver.find_element(By.CSS_SELECTOR, tile % str(i)).get_attribute("data-state")
+                letter_status.append(letter_eval)
+
+            if letter_status.count("correct") == 5:
+                guess = True
+                break
+            
+            self.word_list.remove(word)
+            self.modify(word, letter_status)
+
+        if guess:
+            print('\nWord: %sAttempts: %s' % (word.upper(), attempts))
+        else:
+            print("Unable to guess and solve in 6 turns.")
+
+        time.sleep(3)
+
+    def modify(self, word, letter_status):
+            pass
 
 if __name__ == "__main__":
     WordlePlayer().play()
