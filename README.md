@@ -6,7 +6,7 @@ It does everything from opening the wordle website and even closing the pop-up m
 
 Here's a working demo of the same:
 
-<video src = "https://github.com/parthbhangla/wordle-solver/assets/122162072/ddca6afa-bd9e-498f-b69e-1b59c9525c45"></video>
+<video src = "https://github.com/parthbhangla/wordle-solver/assets/122162072/2c86fb7b-1406-4a3b-af43-1bfc70a64ab2"></video>
 
 You can run this on your desktop too!
 
