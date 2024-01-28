@@ -1,4 +1,3 @@
-# imports
 import time
 import random
 import keyboard
@@ -13,15 +12,13 @@ class WordlePlayer:
         self.options = webdriver.ChromeOptions()
         self.options.add_argument("--disable-notifications")
         self.driver = webdriver.Chrome(options = self.options)
-        self.word_list = self.load()
+        self.word_list = []
 
     def load(self):
-        word_list = []
-        f = open("answers.txt", "r")
+        f = open("wordle-solver/accepted_words.txt", "r")
         for line in f:
-            line.strip()
-            word_list.append(line)
-        return word_list
+            self.word_list.append(line.strip())
+        return self.word_list
 
     def play(self):
         self.driver.get("https://www.nytimes.com/games/wordle/index.html")
@@ -44,30 +41,21 @@ class WordlePlayer:
             print(e)
         time.sleep(1)
 
-        # wordle inspect: there's three states - absent, present and correct so modify list on that basis
-        # it also allows only 6 attemps, so could be a loop idea
-        # random word from the file to start and over again to second guess
+        self.load()
 
-        # basic idea:
-        # guess a word, start a loop (maybe on attempt basis), check states of the letters in the guess
-        # on the basis on states of the letters, search and eliminate words from the original list
-        # pick another random word and run the same loop over and over again until correct word = Found
+        guess = random.choice(self.word_list)
 
-        self.load() # loading the list
-
-        word = random.choice(self.word_list) # random word from the list)
-
-        attempts = 0 # setting attempts to 0
-        guess = False # variable for future check
+        attempts = 0
+        found = False
 
         for attempts in range(6):
             attempts = attempts + 1
             if len(self.word_list) == 0:
-                self.fail("Word wasn't in the 'answers.txt' file")
+                print("Word wasn't in the 'answers.txt' file")
 
-            word = random.choice(self.word_list)
+            guess = random.choice(self.word_list)
 
-            for letter in word:
+            for letter in guess:
                 keyboard.write(letter)
                 time.sleep(0.2)
 
@@ -77,39 +65,59 @@ class WordlePlayer:
 
             time.sleep(2)
 
-            row = (
-                'div[class*="Board"] div[class*="Row-module"]:nth-of-type(%s) '
-                % attempts
-            )
+            row = ('div[class*="Board"] div[class*="Row-module"]:nth-of-type(%s) ' % attempts)
+
             tile = row + 'div:nth-child(%s) div[class*="module_tile__"]'
+
             try:
                 element_present = EC.presence_of_element_located((By.CSS_SELECTOR, tile % "5" + '[data-state$="t"]'))
                 WebDriverWait(self.driver, 10).until(element_present)
             except TimeoutError:
                 print(f"Timed out waiting for element with locator: {tile % '5'} [data-state$='t']")
 
-            letter_status = []
+            feedback = []
 
             for i in range(1, 6):
                 letter_eval = self.driver.find_element(By.CSS_SELECTOR, tile % str(i)).get_attribute("data-state")
-                letter_status.append(letter_eval)
+                feedback.append(letter_eval)
 
-            if letter_status.count("correct") == 5:
-                guess = True
+            if feedback.count("correct") == 5:
+                found = True
                 break
             
-            self.word_list.remove(word)
-            self.modify(word, letter_status)
+            self.word_list.remove(guess)
+            self.modify(guess, feedback)
 
-        if guess:
-            print('\nWord: %sAttempts: %s' % (word.upper(), attempts))
+        if found:
+            print('\nWord: %s\nAttempts: %s' % (guess.upper(), attempts))
         else:
             print("Unable to guess and solve in 6 turns.")
 
-        time.sleep(3)
+        time.sleep(5)
 
-    def modify(self, word, letter_status):
-            pass
+    def modify(self, guess, feedback):
+        filtered_words = set()
+
+        for word in self.word_list:
+            valid_word = True
+        
+            for i in range(len(guess)):
+                if feedback[i] == "correct" and guess[i] != word[i]:
+                    valid_word = False
+                    break
+
+                if feedback[i] == "present" and guess[i] == word[i]:
+                    valid_word = False
+                    break
+
+                if feedback[i] == "absent" and guess[i] in word:
+                    valid_word = False
+                    break
+
+            if valid_word:
+                filtered_words.add(word)
+        
+        self.word_list = list(filtered_words)
 
 if __name__ == "__main__":
     WordlePlayer().play()
