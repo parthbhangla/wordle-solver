@@ -31,3 +31,6 @@ py main.py
 I am open to all suggestions and contributions on the code. Fork the repository and open a pull request to make a contribution. 
 
 ## Author
+
+Twitter: [@myfknlifemate](https://twitter.com/myfknlifemate)
+Github: [@parthbhangla](https://github.com/parthbhangla)
