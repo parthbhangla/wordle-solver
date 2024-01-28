@@ -96,28 +96,38 @@ class WordlePlayer:
         time.sleep(5)
 
     def modify(self, guess, feedback):
-        filtered_words = set()
+        words = []
+        correct_letters = set()
+        present_letters = set()
 
-        for word in self.word_list:
-            valid_word = True
+        for i in range(len(guess)):
+            if feedback[i] == "correct":
+                correct_letters.add(guess[i])
+                for w in self.word_list:
+                    if w[i] == guess[i]:
+                        words.append(w)
+                self.word_list = words
+                words = []
         
-            for i in range(len(guess)):
-                if feedback[i] == "correct" and guess[i] != word[i]:
-                    valid_word = False
-                    break
+            if feedback[i] == "present":
+                present_letters.add(guess[i])
+                for w in self.word_list:
+                    if guess[i] in w and guess[i] != w[i]:
+                        words.append(w)
+                self.word_list = words
+                words = []
 
-                if feedback[i] == "present" and guess[i] == word[i]:
-                    valid_word = False
-                    break
-
-                if feedback[i] == "absent" and guess[i] in word:
-                    valid_word = False
-                    break
-
-            if valid_word:
-                filtered_words.add(word)
-        
-        self.word_list = list(filtered_words)
+            if feedback[i] == "absent":
+                if (guess[i] not in correct_letters and guess[i] not in present_letters):
+                    for w in self.word_list:
+                        if guess[i] not in w:
+                            words.append(w)
+                else:
+                    for w in self.word_list:
+                        if guess[i] != w[i]:
+                            words.append(w)
+                self.word_list = list(set(words))
+                words = []
 
 if __name__ == "__main__":
     WordlePlayer().play()
