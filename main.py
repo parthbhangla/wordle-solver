@@ -15,7 +15,7 @@ class WordlePlayer:
         self.word_list = []
 
     def load(self):
-        f = open("wordle-solver/accepted_words.txt", "r")
+        f = open("accepted_words.txt", "r")
         for line in f:
             self.word_list.append(line.strip())
         return self.word_list
