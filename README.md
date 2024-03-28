@@ -32,5 +32,5 @@ I am open to all suggestions and contributions on the code. Fork the repository 
 
 ## Author
 
-Twitter: [@myfknlifemate](https://twitter.com/myfknlifemate)
+Twitter: [@parthbhangla](https://twitter.com/parthbhangla)
 Github: [@parthbhangla](https://github.com/parthbhangla)
